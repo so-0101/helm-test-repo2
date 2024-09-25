@@ -1,0 +1,5 @@
+replicasCount: 1
+
+wasImage:
+  repository: "ekchoi3912/cicdlab_1"
+  tag: v1

@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: was-svc
+spec:
+  selector:
+    app: was
+  ports:
+  - port: 8080
+    targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: was
+spec:
+  selector:
+    matchLabels:
+      app: was
+  replicas: {{.Values.replicasCount}}
+  template:
+    metadata:
+      labels:
+        app: was
+    spec:
+      containers:
+      - name: was
+        image: {{.Values.wasImage.repository}}:{{.Values.wasImage.tag}}
+        ports:
+        - containerPort: 8080
+      initContainers:
+      - name: wait-for-mysql
+        image: busybox:1.28
+        command: ['sh', '-c', "until nslookup db-0.mysql-svc.default.svc.cluster.local; do echo waiting for db-0.mysql-svc; sleep 2; done"]
+      - name: wait-for-redis
+        image: busybox:1.28
+        command: ['sh', '-c', "until nslookup redis-svc.default.svc.cluster.local; do echo waiting for redis-svc; sleep 2; done"]        
